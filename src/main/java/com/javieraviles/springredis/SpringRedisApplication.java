@@ -1,6 +1,10 @@
 package com.javieraviles.springredis;
 
+import com.javieraviles.springredis.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -16,15 +20,17 @@ import com.javieraviles.springredis.entities.User;
 
 @SpringBootApplication
 @EnableRedisRepositories
-@ComponentScan
 @Configuration
-public class SpringRedisApplication {
+public class SpringRedisApplication implements ApplicationRunner {
 
 	@Value(value = "${redis.hostname}")
 	private String redisHostname;
 
 	@Value(value = "${redis.port}")
 	private int redisPort;
+
+	@Autowired
+	private UserService userService;
 
 	public static void main(final String[] args) {
 		SpringApplication.run(SpringRedisApplication.class, args);
@@ -42,5 +48,13 @@ public class SpringRedisApplication {
 		template.setConnectionFactory(jedisConnectionFactory());
 		template.setKeySerializer(new StringRedisSerializer());
 		return template;
+	}
+
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		User user1 = new User();
+		user1.setEmail("test@test.com");
+		user1.setName("Test1");
+		userService.save(user1);
 	}
 }
